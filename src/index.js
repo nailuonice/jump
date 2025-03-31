@@ -1,3 +1,4 @@
+import './css/style.less';
 import * as resources from './game/resources';
 import StartLayer from './game/StartLayer';
 
@@ -5,11 +6,13 @@ require('./css/index.less');
 
 Tiny.app = new Tiny.Application({
   showFPS: true,
-  referWidth: 375,
-  dpi: 2,
-  renderType: Tiny.RENDERER_TYPE.CANVAS,
+  width: 750,
+  height: 1334,
+  canvasId: 'gameCanvas',
+  fixSize: true,
   renderOptions: {
-    backgroundColor: 0xbbbbbb,
+    antialias: true,
+    backgroundColor: 0x2a3145,
   },
 });
 
@@ -23,27 +26,34 @@ const main = {
     const progress = document.getElementById('progress');
     const percent = document.getElementById('percent');
 
-    Tiny.Loader.run({
-      resources: Object.values(resources),
-      onProgress (pre, res) {
-        // console.log('percent:', pre + '%', res.name);
-        const num = ~~pre;
-        //更新UI
-        percent.innerHTML = `${num}%`;
-        progress.style.width = `${num}%`;
-      },
-      onAllComplete () {
-        // console.log('all complete');
-        //clear DOM
-        const body = document.body;
-        body.removeChild(percent);
-        body.removeChild(progress.parentNode);
+    const loader = new Tiny.loaders.Loader();
 
+    loader.add(Object.values(resources))
+      .load(() => {
+        const { StartLayer } = require('./game/StartLayer');
         const startLayer = new StartLayer();
         Tiny.app.run(startLayer);
-        startLayer.emit('transitionend');
-      },
-    });
+
+        // 添加按钮来切换45度地图
+        const toggleButton = document.createElement('button');
+        toggleButton.textContent = '切换45度地图';
+        toggleButton.style.position = 'absolute';
+        toggleButton.style.top = '20px';
+        toggleButton.style.left = '20px';
+        toggleButton.style.zIndex = '100';
+        toggleButton.style.padding = '10px';
+        toggleButton.style.backgroundColor = '#fff';
+        toggleButton.style.border = 'none';
+        toggleButton.style.borderRadius = '5px';
+        document.body.appendChild(toggleButton);
+
+        let is45Degree = false;
+        toggleButton.addEventListener('click', () => {
+          is45Degree = !is45Degree;
+          startLayer.setMapAngle(is45Degree ? 45 : 30);
+          toggleButton.textContent = is45Degree ? '切换30度地图' : '切换45度地图';
+        });
+      });
   },
 };
 main.init();

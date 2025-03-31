@@ -10,9 +10,10 @@ export const direction = {
  * @param {object} originPos
  * @param {number} delta
  * @param {number} direction
+ * @param {number} [angle=30] 角度，默认30度，可以设置为45度
  */
-export function getTargetBoxPos(originPos, delta, direction) {
-  const deg = 30;
+export function getTargetBoxPos(originPos, delta, direction, angle = 30) {
+  const deg = angle;
 
   const x = originPos.x + direction * delta * Math.cos(Tiny.deg2radian(deg));
   const y = originPos.y - delta * Math.sin(Tiny.deg2radian(deg)); // 只能向上运动
